@@ -1,0 +1,159 @@
+{
+  "name": "study plan",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 19,
+              "triggerAtMinute": 1
+            }
+          ]
+        }
+      },
+      "id": "e4204fca-e47e-44b3-a429-3fe3d95728b4",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=35.6762&longitude=139.6503&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&timezone=Asia/Tokyo",
+        "options": {}
+      },
+      "id": "bed73ac3-b8b6-4644-893b-6e094ed9bf2f",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the 7-day weather forecast (Tokyo):\nDates: {{ JSON.stringify($json.daily.time) }}\nMax temp (°C): {{ JSON.stringify($json.daily.temperature_2m_max) }}\nMin temp (°C): {{ JSON.stringify($json.daily.temperature_2m_min) }}\nRain probability (%): {{ JSON.stringify($json.daily.precipitation_probability_max) }}\nUV index: {{ JSON.stringify($json.daily.uv_index_max) }}\n\nCreate a day-by-day study plan for this week based on the weather. Suggest indoor focused study on rainy or very hot days, and outdoor or lighter revision on pleasant days. Keep it concise.",
+        "batching": {}
+      },
+      "id": "d2f7e03a-6aef-4139-b3f3-0cf9f3d37456",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.8-flash",
+        "options": {}
+      },
+      "id": "bf33c8a2-5d6a-49ae-82ae-1e0a7c69572b",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        224
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "Gateway credits",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "lakshmipriyaa24cys@psnacet.edu.in",
+        "subject": "study plan",
+        "message": "**Weekly Study Plan – Tokyo (Oct 26 – Nov 1, 2026)**\\n\\n**Mon, Oct 26 – 19°C / 12°C, 70% rain**\\nIndoor deep-focus day. Tackle your hardest subject (e.g., math problem sets) in two 90-minute Pomodoro blocks at your desk or a library.\\n\\n**Tue, Oct 27 – 18°C / 11°C, 85% rain**\\nAnother rainy day, so stay indoors. Learn new material: read chapters, take structured notes and build flashcards.\\n\\n**Wed, Oct 28 – 21°C / 13°C, 20% rain, UV 4**\\nPleasant weather. Do lighter revision outdoors, such as reviewing flashcards on a park bench or listening to lecture recordings on a walk.\\n\\n**Thu, Oct 29 – 22°C / 14°.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        816,
+        0
+      ],
+      "id": "ca80e813-f090-4468-89fb-e2da45eecd79",
+      "name": "Send a message",
+      "webhookId": "ff0bad10-3e4f-4a70-b7a7-0a8dae3b0b96",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3mMvyYNBeO3sELGM",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "6249880e-0836-45b7-8de6-adbf983f7a42",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "28219fa5b61bf731625de5dc9901f65657f8a2772678d38770037ac10d342ded"
+  },
+  "nodeGroups": [],
+  "id": "suwvsZ2hVFOyR36M",
+  "tags": []
+}
